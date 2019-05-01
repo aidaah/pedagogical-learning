@@ -53,3 +53,51 @@ loss3 = (1-a)*loss2+a*loss1
 optimizer = tf.train.AdamOptimizer()
 updates = optimizer.minimize(loss3)
 ```
+```ruby
+print(tf.trainable_variables())
+grad = [a for a, b in optimizer.compute_gradients(loss3, var_list=tf.trainable_variables())]
+print(grad)
+```
+
+```ruby
+# Run SGD
+sess = tf.Session()
+sess.run(tf.global_variables_initializer())
+
+aa = 0
+for epoch in range(10):
+    # Train with each example
+    for i in range(len(x_train)):
+        sess.run(updates, feed_dict={X: x_train, ylabel: y_train, a: aa})
+        
+        if i % 20 == 0:
+            y_train_pred = sess.run(ypred, feed_dict={X: x_train})
+            y_test_pred = sess.run(ypred, feed_dict={X: x_test})
+            
+            train_accuracy = np.mean(np.argmax(y_train_pred, axis=1) == np.argmax(y_train, axis=1))
+            test_accuracy = np.mean(np.argmax(y_test_pred, axis=1) == np.argmax(y_test, axis=1))
+        
+            print("Epoch = %d, train accuracy = %.2f%%, test accuracy = %.2f%%"
+                  % (epoch + 1, 100. * train_accuracy, 100. * test_accuracy))
+            
+            ## To compute the gradient of the loss3 with w1,w2,b1,b2, which gives a list [dw1, dw2, db1, db2]
+            ## Note: dw1, dw2, db1 and db2 are all matrices
+            all_grad_value = [sess.run(grad[i], feed_dict={X: x_train, ylabel: y_train, a: aa})
+                              for i in range(len(grad))]
+            #print("all_grad_value")
+            #print(all_grad_value)
+            
+            ## To compute the norm for each of dw1, dw2, db1, db2, which gives 4 numbers,
+            ## and add them together
+            grad_norm = 0
+            for i in range(len(grad)):
+                each_grad_norm = np.sum(abs(all_grad_value[i]))
+                grad_norm = grad_norm + each_grad_norm
+            print("grad_norm : ", grad_norm)
+            
+            if grad_norm < 1 and aa <= 1:
+                aa += 0.01
+                print("update a: ", aa)
+
+sess.close()
+```
