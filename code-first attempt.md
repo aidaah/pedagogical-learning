@@ -31,3 +31,25 @@ num_classes = 10
 y_train = keras.utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)
 ```
+``` ruby
+# Symbols
+X = tf.placeholder("float", shape=[None, 784])
+ylabel = tf.placeholder("float", shape=[None, 10])
+a = tf.placeholder("float", shape=None)
+
+# Weight initializations
+w_1 = tf.Variable(tf.random_normal((784, 32), stddev=0.1))
+b_1 = tf.Variable(tf.random_normal((1, 32), stddev=0.1))
+w_2 = tf.Variable(tf.random_normal((32, 10), stddev=0.1))
+b_2 = tf.Variable(tf.random_normal((1, 10), stddev=0.1))
+
+h = tf.nn.sigmoid(tf.matmul(X, w_1) + b_1)
+ypred = tf.matmul(h, w_2) + b_2
+
+# Backward propagation
+loss1 = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=ylabel, logits=ypred))
+loss2 = tf.reduce_mean((ylabel-ypred)**2)
+loss3 = (1-a)*loss2+a*loss1
+optimizer = tf.train.AdamOptimizer()
+updates = optimizer.minimize(loss3)
+```
